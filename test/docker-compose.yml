@@ -1,0 +1,14 @@
+---
+version: '3'
+services:
+    single-pg-pool-postgres:
+        container_name: single-pg-pool-postgres
+        image: postgres
+        ports:
+            - 5433:5432
+        environment:
+            - POSTGRES_USER=testuser
+            - POSTGRES_PASSWORD=testpass
+            - POSTGRES_DB=testdb
+        healthcheck:
+            test: ["CMD", "pg_isready", "-d", "testdb"]
