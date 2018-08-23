@@ -6,6 +6,7 @@ const Pool = require('pg-pool')
 // The pool instance is stored here
 let _pool
 let _connected
+let _closing
 
 module.exports = async (opts) => {
   if (!opts && _pool && _connected === true) {
@@ -34,9 +35,14 @@ module.exports = async (opts) => {
 
 module.exports.end = async function () {
   if (!_pool) {
-    throw new Error('You must configure the pool before calling end')
+    return
   }
-  const ret = await _pool.end()
+  if (_closing) {
+    return _closing
+  }
+  _closing = _pool.end()
+  const ret = await _closing
+  _closing = false
   _connected = false
   _pool = null
   return ret
