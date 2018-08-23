@@ -1,6 +1,6 @@
 {
   "name": "@wesleytodd/pg",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Postgres pool singleton with helpers",
   "author": "Wes Todd <wes@wesleytodd.com>",
   "keywords": [
