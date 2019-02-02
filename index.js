@@ -23,7 +23,13 @@ module.exports = async (opts) => {
   }
 
   // Set defaults from env vars
-  _pool = new Pool(opts)
+  _pool = new Pool(Object.assign({
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE
+  }, opts))
 
   // Ensure connected and can query
   _connected = _pool.query('SELECT TRUE')
