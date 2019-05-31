@@ -17,6 +17,8 @@ describe(pkgName, () => {
     })
   })
   after(async () => {
+    await pool.query('DROP TABLE IF EXISTS testtrans')
+    await pool.query('DROP TABLE IF EXISTS testrollback')
     return Pool.end()
   })
 
@@ -26,7 +28,7 @@ describe(pkgName, () => {
   })
 
   it('should create a transaction', async () => {
-    await pool.query('CREATE TABLE testtrans (id SERIAL, field VARCHAR(255), PRIMARY KEY(id));')
+    await pool.query('CREATE TABLE IF NOT EXISTS testtrans (id SERIAL, field VARCHAR(255), PRIMARY KEY(id));')
 
     const ins = await Pool.transaction((conn) => {
       return conn.query(`INSERT INTO testtrans (field) VALUES ('foo') RETURNING id;`)
@@ -39,7 +41,7 @@ describe(pkgName, () => {
   })
 
   it('should rollback a transaction', async () => {
-    await pool.query('CREATE TABLE testrollback (id SERIAL, field VARCHAR(255), PRIMARY KEY(id));')
+    await pool.query('CREATE TABLE IF NOT EXISTS testrollback (id SERIAL, field VARCHAR(255), PRIMARY KEY(id));')
 
     try {
       await Pool.transaction(async (conn) => {
@@ -53,5 +55,26 @@ describe(pkgName, () => {
 
     const sel = await pool.query('SELECT * FROM testrollback')
     assert.equal(sel.rows.length, 0)
+  })
+
+  it('should handle errors and add sql', async () => {
+    // Even though this looks like it tests the promise
+    // interface, the pool makes it a callback
+    try {
+      await pool.query('INVALID QUERY')
+    } catch (e) {
+      assert.strictEqual(e.sql, 'INVALID QUERY')
+      assert.strictEqual(e.params, undefined)
+    }
+
+    // Promise version requires normal client
+    const c = await pool.connect()
+    try {
+      await c.query('INVALID QUERY', ['foo'])
+    } catch (e) {
+      assert.strictEqual(e.sql, 'INVALID QUERY')
+      assert.strictEqual(e.params[0], 'foo')
+    }
+    await c.release()
   })
 })

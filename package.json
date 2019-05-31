@@ -18,6 +18,7 @@
   },
   "scripts": {
     "test": "standard && npm run docker-up && mocha && npm run docker-down",
+    "test-watch": "standard && npm run docker-up && mocha --watch",
     "docker-up": "cd test && docker-compose up --force-recreate -d && ./wait.sh",
     "docker-down": "cd test && docker-compose down",
     "prepublushOnly": "npm t",
@@ -25,7 +26,9 @@
   },
   "dependencies": {
     "pg": "^7.4.3",
-    "pg-pool": "^2.0.3"
+    "pg-error-constants": "^1.0.0",
+    "pg-pool": "^2.0.3",
+    "sql-template-strings": "^2.2.2"
   },
   "devDependencies": {
     "mocha": "^5.2.0",
